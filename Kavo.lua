@@ -1,9 +1,4 @@
--- Kavo UI Library - 修复美化版
--- 修复了UI错误，增加了拖放功能，优化了界面布局
--- 作者：江砚辰
-
 local Kavo = {}
-
 local tween = game:GetService("TweenService")
 local tweeninfo = TweenInfo.new
 local input = game:GetService("UserInputService")
@@ -17,10 +12,8 @@ local UIStates = {}
 local minimizedStates = {}
 local notifications = {}
 
--- 修复：添加缺失的拖放功能
 function Kavo:DraggingEnabled(frame, parent)
     parent = parent or frame
-    
     local dragging = false
     local dragInput, mousePos, framePos
 
@@ -61,7 +54,6 @@ function Utility:TweenObject(obj, properties, duration, ...)
     tween:Create(obj, tweeninfo(duration, ...), properties):Play()
 end
 
--- 美观的主题系统
 local themes = {
     SchemeColor = Color3.fromRGB(74, 99, 135),
     Background = Color3.fromRGB(36, 37, 43),
@@ -148,7 +140,6 @@ local themeStyles = {
     }
 }
 
--- 配置保存
 local SettingsT = {}
 local Name = "KavoConfig.JSON"
 
@@ -161,7 +152,6 @@ end)
 
 local LibName = "KavoUI_"..tostring(math.random(1, 10000))..tostring(math.random(1, 10000))
 
--- 修复：切换UI显示/隐藏
 function Kavo:ToggleUI()
     local screenGui = game.CoreGui:FindFirstChild(LibName)
     if screenGui then
@@ -169,7 +159,6 @@ function Kavo:ToggleUI()
     end
 end
 
--- 优化：美观的最小化功能
 function Kavo:ToggleMinimize()
     local screenGui = game.CoreGui:FindFirstChild(LibName)
     if not screenGui then return end
@@ -180,12 +169,10 @@ function Kavo:ToggleMinimize()
     local minimized = minimizedStates[LibName] or false
     
     if minimized then
-        -- 展开UI
         Utility:TweenObject(mainFrame, {
             Size = UDim2.new(0, 600, 0, 400)
         }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         
-        -- 显示内容区域
         for _, child in pairs(mainFrame:GetChildren()) do
             if child.Name ~= "MainHeader" then
                 Utility:TweenObject(child, {
@@ -196,12 +183,10 @@ function Kavo:ToggleMinimize()
         
         minimizedStates[LibName] = false
     else
-        -- 最小化UI
         Utility:TweenObject(mainFrame, {
             Size = UDim2.new(0, 600, 0, 40)
         }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         
-        -- 隐藏内容区域（标题栏除外）
         for _, child in pairs(mainFrame:GetChildren()) do
             if child.Name ~= "MainHeader" then
                 Utility:TweenObject(child, {
@@ -225,7 +210,6 @@ function Kavo:LoadUIPosition()
     if UIStates[LibName] and UIStates[LibName].Position then
         return UIStates[LibName].Position
     end
-    -- 屏幕中央75%大小
     return UDim2.new(0.125, 0, 0.125, 0)
 end
 
@@ -244,7 +228,6 @@ function Kavo:BindToggleKey(keyCode)
     end)
 end
 
--- 修复：通知系统
 function Kavo:Notify(title, content, duration, image)
     title = title or "通知"
     content = content or ""
@@ -358,7 +341,6 @@ function Kavo:Notify(title, content, duration, image)
     progressBarFillCorner.CornerRadius = UDim.new(0, 2)
     progressBarFillCorner.Parent = progressBarFill
     
-    -- 动画显示
     notificationFrame.Position = UDim2.new(1, 10, 1, -150)
     local showPosition = UDim2.new(1, -340, 1, -150)
     
@@ -378,7 +360,6 @@ function Kavo:Notify(title, content, duration, image)
         end)
     end)
     
-    -- 自动关闭计时器
     local progressTime = duration
     local startTime = tick()
     
@@ -411,7 +392,6 @@ function Kavo:Notify(title, content, duration, image)
         end)
     end
     
-    -- 悬停效果
     local hovering = false
     notificationFrame.MouseEnter:Connect(function()
         hovering = true
@@ -469,37 +449,31 @@ function Kavo:Notification(title, content, duration, image)
     return self:Notify(title, content, duration, image)
 end
 
--- 创建主UI
 function Kavo.CreateLib(kavName, themeList)
     kavName = kavName or "江砚辰 - 功能脚本"
     
-    -- 处理主题
     if type(themeList) == "string" then
         themeList = themeStyles[themeList] or themes
     elseif not themeList then
         themeList = themes
     end
     
-    -- 合并主题
     local theme = {}
     for k, v in pairs(themes) do
         theme[k] = themeList[k] or v
     end
     
-    -- 清理旧UI
     for i, v in pairs(game.CoreGui:GetChildren()) do
         if v:IsA("ScreenGui") and v.Name:find("KavoUI_") then
             v:Destroy()
         end
     end
     
-    -- 创建主UI容器
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = LibName
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.ResetOnSpawn = false
     
-    -- 主窗口框架
     local Main = Instance.new("Frame")
     Main.Name = "Main"
     Main.Parent = ScreenGui
@@ -512,7 +486,6 @@ function Kavo.CreateLib(kavName, themeList)
     MainCorner.CornerRadius = UDim.new(0, 10)
     MainCorner.Parent = Main
     
-    -- 标题栏
     local MainHeader = Instance.new("Frame")
     MainHeader.Name = "MainHeader"
     MainHeader.Parent = Main
@@ -523,7 +496,6 @@ function Kavo.CreateLib(kavName, themeList)
     headerCover.CornerRadius = UDim.new(0, 10)
     headerCover.Parent = MainHeader
     
-    -- 标题
     local title = Instance.new("TextLabel")
     title.Name = "title"
     title.Parent = MainHeader
@@ -536,7 +508,6 @@ function Kavo.CreateLib(kavName, themeList)
     title.TextSize = 18
     title.TextXAlignment = Enum.TextXAlignment.Left
     
-    -- 最小化按钮
     local minimize = Instance.new("ImageButton")
     minimize.Name = "minimize"
     minimize.Parent = MainHeader
@@ -552,7 +523,6 @@ function Kavo.CreateLib(kavName, themeList)
         Kavo:ToggleMinimize()
     end)
     
-    -- 关闭按钮
     local close = Instance.new("ImageButton")
     close.Name = "close"
     close.Parent = MainHeader
@@ -570,16 +540,12 @@ function Kavo.CreateLib(kavName, themeList)
         }, 0.1)
         Utility:TweenObject(Main, {
             Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(
-                0.5, 0,
-                0.5, 0
-            )
+            Position = UDim2.new(0.5, 0, 0.5, 0)
         }, 0.2)
         wait(0.3)
         ScreenGui:Destroy()
     end)
     
-    -- 侧边栏
     local MainSide = Instance.new("Frame")
     MainSide.Name = "MainSide"
     MainSide.Parent = Main
@@ -591,7 +557,6 @@ function Kavo.CreateLib(kavName, themeList)
     sideCorner.CornerRadius = UDim.new(0, 10)
     sideCorner.Parent = MainSide
     
-    -- 标签页容器
     local tabFrames = Instance.new("Frame")
     tabFrames.Name = "tabFrames"
     tabFrames.Parent = MainSide
@@ -605,7 +570,6 @@ function Kavo.CreateLib(kavName, themeList)
     tabListing.SortOrder = Enum.SortOrder.LayoutOrder
     tabListing.Padding = UDim.new(0, 8)
     
-    -- 内容区域
     local pages = Instance.new("Frame")
     pages.Name = "pages"
     pages.Parent = Main
@@ -617,7 +581,6 @@ function Kavo.CreateLib(kavName, themeList)
     Pages.Name = "Pages"
     Pages.Parent = pages
     
-    -- 阴影效果
     local shadow = Instance.new("ImageLabel")
     shadow.Name = "Shadow"
     shadow.Parent = Main
@@ -631,10 +594,8 @@ function Kavo.CreateLib(kavName, themeList)
     shadow.SliceCenter = Rect.new(23, 23, 277, 277)
     shadow.ZIndex = -1
     
-    -- 启用拖放功能
     Kavo:DraggingEnabled(MainHeader, Main)
     
-    -- 保存位置
     local function savePosition()
         Kavo:SaveUIPosition(Main.Position)
     end
@@ -645,7 +606,6 @@ function Kavo.CreateLib(kavName, themeList)
         end
     end)
     
-    -- 主题更新循环
     coroutine.wrap(function()
         while wait(0.1) do
             Main.BackgroundColor3 = theme.Background
@@ -658,7 +618,6 @@ function Kavo.CreateLib(kavName, themeList)
         end
     end)()
     
-    -- 主题颜色修改函数
     function Kavo:ChangeColor(property, color)
         if property == "Background" then
             theme.Background = color
@@ -673,7 +632,6 @@ function Kavo.CreateLib(kavName, themeList)
         end
     end
     
-    -- 标签页系统
     local Tabs = {}
     local first = true
     
@@ -685,7 +643,6 @@ function Kavo.CreateLib(kavName, themeList)
         local page = Instance.new("ScrollingFrame")
         local pageListing = Instance.new("UIListLayout")
         
-        -- 创建页面
         page.Name = tabName.."Page"
         page.Parent = Pages
         page.Active = true
@@ -701,7 +658,6 @@ function Kavo.CreateLib(kavName, themeList)
         pageListing.SortOrder = Enum.SortOrder.LayoutOrder
         pageListing.Padding = UDim.new(0, 10)
         
-        -- 创建标签按钮
         tabButton.Name = tabName.."TabButton"
         tabButton.Parent = tabFrames
         tabButton.BackgroundColor3 = first and theme.SchemeColor or theme.Header
@@ -721,7 +677,6 @@ function Kavo.CreateLib(kavName, themeList)
             page.Visible = true
         end
         
-        -- 页面大小更新
         local function UpdateSize()
             local cS = pageListing.AbsoluteContentSize
             page.CanvasSize = UDim2.new(0, 0, 0, cS.Y + 20)
@@ -731,14 +686,11 @@ function Kavo.CreateLib(kavName, themeList)
         page.ChildAdded:Connect(UpdateSize)
         page.ChildRemoved:Connect(UpdateSize)
         
-        -- 标签按钮点击事件
         tabButton.MouseButton1Click:Connect(function()
-            -- 隐藏所有页面
             for i, v in pairs(Pages:GetChildren()) do
                 v.Visible = false
             end
             
-            -- 重置所有标签按钮
             for i, v in pairs(tabFrames:GetChildren()) do
                 if v:IsA("TextButton") then
                     Utility:TweenObject(v, {
@@ -748,18 +700,15 @@ function Kavo.CreateLib(kavName, themeList)
                 end
             end
             
-            -- 激活当前标签
             Utility:TweenObject(tabButton, {
                 BackgroundColor3 = theme.SchemeColor,
                 TextColor3 = theme.TextColor
             }, 0.2)
             
-            -- 显示当前页面
             page.Visible = true
             UpdateSize()
         end)
         
-        -- 悬停效果
         tabButton.MouseEnter:Connect(function()
             if tabButton.BackgroundColor3 ~= theme.SchemeColor then
                 Utility:TweenObject(tabButton, {
@@ -780,7 +729,6 @@ function Kavo.CreateLib(kavName, themeList)
             end
         end)
         
-        -- 主题更新
         coroutine.wrap(function()
             while wait(0.1) do
                 tabButton.BackgroundColor3 = tabButton.BackgroundColor3 == theme.SchemeColor and theme.SchemeColor or theme.Header
@@ -788,7 +736,6 @@ function Kavo.CreateLib(kavName, themeList)
             end
         end)()
         
-        -- 分区系统
         local Sections = {}
         
         function Sections:NewSection(secName)
@@ -801,13 +748,11 @@ function Kavo.CreateLib(kavName, themeList)
             local sectionInners = Instance.new("Frame")
             local sectionElListing = Instance.new("UIListLayout")
             
-            -- 分区框架
             sectionFrame.Name = "sectionFrame"
             sectionFrame.Parent = page
             sectionFrame.BackgroundTransparency = 1
             sectionFrame.Size = UDim2.new(1, 0, 0, 0)
             
-            -- 分区标题
             sectionHead.Name = "sectionHead"
             sectionHead.Parent = sectionFrame
             sectionHead.BackgroundColor3 = theme.SchemeColor
@@ -827,7 +772,6 @@ function Kavo.CreateLib(kavName, themeList)
             sectionName.TextSize = 14
             sectionName.TextXAlignment = Enum.TextXAlignment.Left
             
-            -- 控件容器
             sectionInners.Name = "sectionInners"
             sectionInners.Parent = sectionFrame
             sectionInners.BackgroundTransparency = 1
@@ -839,7 +783,6 @@ function Kavo.CreateLib(kavName, themeList)
             sectionElListing.SortOrder = Enum.SortOrder.LayoutOrder
             sectionElListing.Padding = UDim.new(0, 8)
             
-            -- 更新大小
             local function updateSectionFrame()
                 local innerSc = sectionElListing.AbsoluteContentSize
                 sectionInners.Size = UDim2.new(1, 0, 0, innerSc.Y)
@@ -850,7 +793,6 @@ function Kavo.CreateLib(kavName, themeList)
             updateSectionFrame()
             sectionElListing:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionFrame)
             
-            -- 主题更新
             coroutine.wrap(function()
                 while wait(0.1) do
                     sectionHead.BackgroundColor3 = theme.SchemeColor
@@ -858,10 +800,8 @@ function Kavo.CreateLib(kavName, themeList)
                 end
             end)()
             
-            -- 控件元素
             local Elements = {}
             
-            -- 按钮控件
             function Elements:NewButton(bname, tipInf, callback)
                 bname = bname or "按钮"
                 tipInf = tipInf or "点击执行功能"
@@ -903,11 +843,9 @@ function Kavo.CreateLib(kavName, themeList)
                 btnInfo.TextSize = 14
                 btnInfo.TextXAlignment = Enum.TextXAlignment.Left
                 
-                -- 点击效果
                 buttonElement.MouseButton1Click:Connect(function()
                     callback()
                     
-                    -- 点击动画
                     Utility:TweenObject(buttonElement, {
                         BackgroundColor3 = Color3.fromRGB(
                             theme.SchemeColor.r * 255,
@@ -923,7 +861,6 @@ function Kavo.CreateLib(kavName, themeList)
                     }, 0.1)
                 end)
                 
-                -- 悬停效果
                 buttonElement.MouseEnter:Connect(function()
                     Utility:TweenObject(buttonElement, {
                         BackgroundColor3 = Color3.fromRGB(
@@ -942,7 +879,6 @@ function Kavo.CreateLib(kavName, themeList)
                 
                 updateSectionFrame()
                 
-                -- 主题更新
                 coroutine.wrap(function()
                     while wait(0.1) do
                         buttonElement.BackgroundColor3 = buttonElement.BackgroundColor3 == Color3.fromRGB(
@@ -969,7 +905,6 @@ function Kavo.CreateLib(kavName, themeList)
                 return ButtonFunction
             end
             
-            -- 开关控件
             function Elements:NewToggle(tname, nTip, callback)
                 tname = tname or "开关"
                 nTip = nTip or "开启或关闭功能"
@@ -1024,7 +959,6 @@ function Kavo.CreateLib(kavName, themeList)
                 togName.TextSize = 14
                 togName.TextXAlignment = Enum.TextXAlignment.Left
                 
-                -- 切换开关
                 toggleElement.MouseButton1Click:Connect(function()
                     toggled = not toggled
                     
@@ -1041,7 +975,6 @@ function Kavo.CreateLib(kavName, themeList)
                     callback(toggled)
                 end)
                 
-                -- 悬停效果
                 toggleElement.MouseEnter:Connect(function()
                     Utility:TweenObject(toggleElement, {
                         BackgroundColor3 = Color3.fromRGB(
@@ -1060,7 +993,6 @@ function Kavo.CreateLib(kavName, themeList)
                 
                 updateSectionFrame()
                 
-                -- 主题更新
                 coroutine.wrap(function()
                     while wait(0.1) do
                         toggleElement.BackgroundColor3 = toggleElement.BackgroundColor3 == Color3.fromRGB(
@@ -1098,7 +1030,6 @@ function Kavo.CreateLib(kavName, themeList)
                 return TogFunction
             end
             
-            -- 滑块控件
             function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, callback)
                 slidInf = slidInf or "滑块"
                 slidTip = slidTip or "调整数值"
@@ -1167,7 +1098,6 @@ function Kavo.CreateLib(kavName, themeList)
                 sliderDrag.BackgroundColor3 = theme.SchemeColor
                 sliderDrag.Size = UDim2.new(0, 0, 1, 0)
                 
-                -- 滑块拖动
                 local mouse = game:GetService("Players").LocalPlayer:GetMouse()
                 local dragging = false
                 
@@ -1204,7 +1134,6 @@ function Kavo.CreateLib(kavName, themeList)
                 
                 updateSectionFrame()
                 
-                -- 主题更新
                 coroutine.wrap(function()
                     while wait(0.1) do
                         sliderElement.BackgroundColor3 = theme.ElementColor
@@ -1217,270 +1146,6 @@ function Kavo.CreateLib(kavName, themeList)
                 end)()
             end
             
-            -- 下拉框控件
-            function Elements:NewDropdown(dropname, dropinf, list, callback)
-                dropname = dropname or "下拉框"
-                dropinf = dropinf or "选择选项"
-                list = list or {"选项1", "选项2", "选项3"}
-                callback = callback or function() end
-                
-                local opened = false
-                local selected = list[1] or ""
-                
-                local dropFrame = Instance.new("Frame")
-                local dropOpen = Instance.new("TextButton")
-                local listImg = Instance.new("ImageLabel")
-                local itemTextbox = Instance.new("TextLabel")
-                local UICorner = Instance.new("UICorner")
-                local UIListLayout = Instance.new("UIListLayout")
-                local dropOptions = Instance.new("Frame")
-                
-                dropFrame.Name = "dropFrame"
-                dropFrame.Parent = sectionInners
-                dropFrame.BackgroundTransparency = 1
-                dropFrame.Size = UDim2.new(1, 0, 0, 40)
-                dropFrame.ClipsDescendants = true
-                
-                dropOpen.Name = "dropOpen"
-                dropOpen.Parent = dropFrame
-                dropOpen.BackgroundColor3 = theme.ElementColor
-                dropOpen.Size = UDim2.new(1, 0, 0, 40)
-                dropOpen.AutoButtonColor = false
-                dropOpen.Text = ""
-                
-                UICorner.CornerRadius = UDim.new(0, 8)
-                UICorner.Parent = dropOpen
-                
-                listImg.Name = "listImg"
-                listImg.Parent = dropOpen
-                listImg.BackgroundTransparency = 1
-                listImg.Position = UDim2.new(0, 10, 0, 10)
-                listImg.Size = UDim2.new(0, 20, 0, 20)
-                listImg.Image = "rbxassetid://3926305904"
-                listImg.ImageColor3 = theme.SchemeColor
-                listImg.ImageRectOffset = Vector2.new(644, 364)
-                listImg.ImageRectSize = Vector2.new(36, 36)
-                
-                itemTextbox.Name = "itemTextbox"
-                itemTextbox.Parent = dropOpen
-                itemTextbox.BackgroundTransparency = 1
-                itemTextbox.Position = UDim2.new(0, 40, 0, 0)
-                itemTextbox.Size = UDim2.new(1, -80, 1, 0)
-                itemTextbox.Font = Enum.Font.GothamSemibold
-                itemTextbox.Text = dropname
-                itemTextbox.TextColor3 = theme.TextColor
-                itemTextbox.TextSize = 14
-                itemTextbox.TextXAlignment = Enum.TextXAlignment.Left
-                
-                -- 下拉箭头
-                local arrow = Instance.new("ImageLabel")
-                arrow.Name = "arrow"
-                arrow.Parent = dropOpen
-                arrow.BackgroundTransparency = 1
-                arrow.Position = UDim2.new(1, -30, 0, 10)
-                arrow.Size = UDim2.new(0, 20, 0, 20)
-                arrow.Image = "rbxassetid://3926305904"
-                arrow.ImageColor3 = theme.SchemeColor
-                arrow.ImageRectOffset = Vector2.new(884, 284)
-                arrow.ImageRectSize = Vector2.new(36, 36)
-                
-                dropOptions.Name = "dropOptions"
-                dropOptions.Parent = dropFrame
-                dropOptions.BackgroundColor3 = theme.ElementColor
-                dropOptions.Position = UDim2.new(0, 0, 0, 45)
-                dropOptions.Size = UDim2.new(1, 0, 0, 0)
-                dropOptions.Visible = false
-                
-                UIListLayout.Parent = dropOptions
-                UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                
-                -- 创建选项
-                local function createOptions()
-                    dropOptions:ClearAllChildren()
-                    UIListLayout.Parent = dropOptions
-                    
-                    for i, option in pairs(list) do
-                        local optionBtn = Instance.new("TextButton")
-                        local optionCorner = Instance.new("UICorner")
-                        
-                        optionBtn.Name = "option_"..i
-                        optionBtn.Parent = dropOptions
-                        optionBtn.BackgroundColor3 = theme.ElementColor
-                        optionBtn.Size = UDim2.new(1, 0, 0, 35)
-                        optionBtn.AutoButtonColor = false
-                        optionBtn.Text = ""
-                        
-                        optionCorner.CornerRadius = UDim.new(0, 6)
-                        optionCorner.Parent = optionBtn
-                        
-                        local optionText = Instance.new("TextLabel")
-                        optionText.Name = "optionText"
-                        optionText.Parent = optionBtn
-                        optionText.BackgroundTransparency = 1
-                        optionText.Position = UDim2.new(0, 15, 0, 0)
-                        optionText.Size = UDim2.new(1, -30, 1, 0)
-                        optionText.Font = Enum.Font.Gotham
-                        optionText.Text = option
-                        optionText.TextColor3 = theme.TextColor
-                        optionText.TextSize = 14
-                        optionText.TextXAlignment = Enum.TextXAlignment.Left
-                        
-                        optionBtn.MouseButton1Click:Connect(function()
-                            selected = option
-                            itemTextbox.Text = option
-                            callback(option)
-                            dropOpen.Text = ""
-                            
-                            -- 关闭下拉框
-                            opened = false
-                            dropOptions.Visible = false
-                            dropFrame.Size = UDim2.new(1, 0, 0, 40)
-                            updateSectionFrame()
-                            
-                            Utility:TweenObject(arrow, {
-                                Rotation = 0
-                            }, 0.2)
-                        end)
-                        
-                        optionBtn.MouseEnter:Connect(function()
-                            Utility:TweenObject(optionBtn, {
-                                BackgroundColor3 = Color3.fromRGB(
-                                    theme.ElementColor.r * 255 + 10,
-                                    theme.ElementColor.g * 255 + 10,
-                                    theme.ElementColor.b * 255 + 10
-                                )
-                            }, 0.2)
-                        end)
-                        
-                        optionBtn.MouseLeave:Connect(function()
-                            Utility:TweenObject(optionBtn, {
-                                BackgroundColor3 = theme.ElementColor
-                            }, 0.2)
-                        end)
-                    end
-                end
-                
-                createOptions()
-                
-                -- 切换下拉框
-                dropOpen.MouseButton1Click:Connect(function()
-                    opened = not opened
-                    
-                    if opened then
-                        local optionCount = #list
-                        local optionHeight = math.min(optionCount * 35, 200)
-                        
-                        dropOptions.Visible = true
-                        dropOptions.Size = UDim2.new(1, 0, 0, optionHeight)
-                        dropFrame.Size = UDim2.new(1, 0, 0, 40 + optionHeight)
-                        
-                        Utility:TweenObject(arrow, {
-                            Rotation = 180
-                        }, 0.2)
-                    else
-                        dropOptions.Visible = false
-                        dropFrame.Size = UDim2.new(1, 0, 0, 40)
-                        
-                        Utility:TweenObject(arrow, {
-                            Rotation = 0
-                        }, 0.2)
-                    end
-                    
-                    updateSectionFrame()
-                end)
-                
-                -- 悬停效果
-                dropOpen.MouseEnter:Connect(function()
-                    Utility:TweenObject(dropOpen, {
-                        BackgroundColor3 = Color3.fromRGB(
-                            theme.ElementColor.r * 255 + 10,
-                            theme.ElementColor.g * 255 + 10,
-                            theme.ElementColor.b * 255 + 10
-                        )
-                    }, 0.2)
-                end)
-                
-                dropOpen.MouseLeave:Connect(function()
-                    Utility:TweenObject(dropOpen, {
-                        BackgroundColor3 = theme.ElementColor
-                    }, 0.2)
-                end)
-                
-                updateSectionFrame()
-                
-                -- 主题更新
-                coroutine.wrap(function()
-                    while wait(0.1) do
-                        dropOpen.BackgroundColor3 = dropOpen.BackgroundColor3 == Color3.fromRGB(
-                            theme.ElementColor.r * 255 + 10,
-                            theme.ElementColor.g * 255 + 10,
-                            theme.ElementColor.b * 255 + 10
-                        ) and Color3.fromRGB(
-                            theme.ElementColor.r * 255 + 10,
-                            theme.ElementColor.g * 255 + 10,
-                            theme.ElementColor.b * 255 + 10
-                        ) or theme.ElementColor
-                        
-                        listImg.ImageColor3 = theme.SchemeColor
-                        itemTextbox.TextColor3 = theme.TextColor
-                        arrow.ImageColor3 = theme.SchemeColor
-                        dropOptions.BackgroundColor3 = theme.ElementColor
-                        
-                        for _, optionBtn in pairs(dropOptions:GetChildren()) do
-                            if optionBtn:IsA("TextButton") then
-                                optionBtn.BackgroundColor3 = optionBtn.BackgroundColor3 == Color3.fromRGB(
-                                    theme.ElementColor.r * 255 + 10,
-                                    theme.ElementColor.g * 255 + 10,
-                                    theme.ElementColor.b * 255 + 10
-                                ) and Color3.fromRGB(
-                                    theme.ElementColor.r * 255 + 10,
-                                    theme.ElementColor.g * 255 + 10,
-                                    theme.ElementColor.b * 255 + 10
-                                ) or theme.ElementColor
-                                
-                                if optionBtn:FindFirstChild("optionText") then
-                                    optionBtn.optionText.TextColor3 = theme.TextColor
-                                end
-                            end
-                        end
-                    end
-                end)()
-                
-                local DropFunction = {}
-                
-                function DropFunction:Refresh(newList)
-                    list = newList or list
-                    selected = list[1] or ""
-                    itemTextbox.Text = dropname
-                    createOptions()
-                    
-                    if opened then
-                        opened = false
-                        dropOptions.Visible = false
-                        dropFrame.Size = UDim2.new(1, 0, 0, 40)
-                        Utility:TweenObject(arrow, {
-                            Rotation = 0
-                        }, 0.2)
-                        updateSectionFrame()
-                    end
-                end
-                
-                function DropFunction:GetSelected()
-                    return selected
-                end
-                
-                function DropFunction:SetSelected(value)
-                    if table.find(list, value) then
-                        selected = value
-                        itemTextbox.Text = value
-                        callback(value)
-                    end
-                end
-                
-                return DropFunction
-            end
-            
-            -- 标签控件
             function Elements:NewLabel(title)
                 title = title or "标签"
                 
@@ -1520,7 +1185,6 @@ function Kavo.CreateLib(kavName, themeList)
     return Tabs
 end
 
--- 发送初始通知
 coroutine.wrap(function()
     wait(1)
     if Kavo.Notify then
