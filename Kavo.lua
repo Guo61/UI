@@ -4,7 +4,6 @@ local tween = game:GetService("TweenService")
 local input = game:GetService("UserInputService")
 local run = game:GetService("RunService")
 local players = game:GetService("Players")
-local lighting = game:GetService("Lighting")
 local http = game:GetService("HttpService")
 
 local localPlayer = players.LocalPlayer
@@ -42,64 +41,11 @@ function Utility:PlaySound(id, volume)
     end
 end
 
-function Utility:CreateParticleEffect(parent, effectType, color)
-    local effect = Instance.new("ParticleEmitter")
-    effect.Parent = parent
-    
-    if effectType == "sparkle" then
-        effect.Texture = "rbxassetid://242098110"
-        effect.Lifetime = NumberRange.new(0.5, 1)
-        effect.Rate = 20
-        effect.Speed = NumberRange.new(10, 20)
-        effect.Rotation = NumberRange.new(0, 360)
-        effect.RotSpeed = NumberRange.new(-180, 180)
-        effect.Enabled = false
-    elseif effectType == "glow" then
-        effect.Texture = "rbxassetid://242098114"
-        effect.Lifetime = NumberRange.new(1, 2)
-        effect.Rate = 10
-        effect.Speed = NumberRange.new(5, 10)
-        effect.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.2),
-            NumberSequenceKeypoint.new(0.5, 0.5),
-            NumberSequenceKeypoint.new(1, 0)
-        })
-    end
-    
-    if color then
-        effect.Color = ColorSequence.new(color)
-    end
-    
-    effects[effect] = true
-    return effect
-end
-
 function Utility:TweenObject(obj, properties, duration, easingStyle, easingDirection)
     local info = TweenInfo.new(duration or 0.3, easingStyle or Enum.EasingStyle.Quad, easingDirection or Enum.EasingDirection.Out)
     local tween = tween:Create(obj, info, properties)
     tween:Play()
     return tween
-end
-
-function Utility:SpringAnimation(obj, property, target, damping, frequency)
-    local connection
-    local current = obj[property]
-    local velocity = 0
-    
-    local function update(dt)
-        local force = (target - current) * frequency
-        velocity = velocity * (1 - damping) + force * dt
-        current = current + velocity
-        obj[property] = current
-        
-        if math.abs(target - current) < 0.01 and math.abs(velocity) < 0.01 then
-            if connection then connection:Disconnect() end
-        end
-    end
-    
-    connection = run.RenderStepped:Connect(update)
-    animations[connection] = true
-    return connection
 end
 
 function Utility:ShakeObject(obj, intensity, duration)
@@ -201,68 +147,6 @@ function Kavo:DraggingEnabled(frame, parent)
     end)
 end
 
-function Kavo:CreateCustomCursor(cursorType, color, size)
-    local cursor = Instance.new("ImageLabel")
-    cursor.Name = "CustomCursor"
-    cursor.Parent = game.CoreGui
-    cursor.BackgroundTransparency = 1
-    cursor.Size = UDim2.new(0, size or 32, 0, size or 32)
-    cursor.ZIndex = 99999
-    cursor.Visible = false
-    
-    if cursorType == "pointer" then
-        cursor.Image = "rbxassetid://3926305904"
-        cursor.ImageRectOffset = Vector2.new(284, 4)
-        cursor.ImageRectSize = Vector2.new(24, 24)
-    elseif cursorType == "hand" then
-        cursor.Image = "rbxassetid://3926305904"
-        cursor.ImageRectOffset = Vector2.new(4, 964)
-        cursor.ImageRectSize = Vector2.new(36, 36)
-    elseif cursorType == "crosshair" then
-        cursor.Image = "rbxassetid://3926305904"
-        cursor.ImageRectOffset = Vector2.new(164, 404)
-        cursor.ImageRectSize = Vector2.new(36, 36)
-    elseif cursorType == "custom" then
-        cursor.Image = "rbxassetid://"..tostring(cursorType)
-    end
-    
-    if color then
-        cursor.ImageColor3 = color
-    end
-    
-    local connection = run.RenderStepped:Connect(function()
-        local mouseLocation = input:GetMouseLocation()
-        cursor.Position = UDim2.new(0, mouseLocation.X - (size or 32)/2, 0, mouseLocation.Y - (size or 32)/2)
-    end)
-    
-    customCursors[cursor] = connection
-    
-    local function enableCursor()
-        cursor.Visible = true
-        game:GetService("UserInputService").MouseIconEnabled = false
-    end
-    
-    local function disableCursor()
-        cursor.Visible = false
-        game:GetService("UserInputService").MouseIconEnabled = true
-    end
-    
-    return {
-        Enable = enableCursor,
-        Disable = disableCursor,
-        SetType = function(newType)
-            cursor.Image = "rbxassetid://"..tostring(newType)
-        end,
-        SetColor = function(newColor)
-            cursor.ImageColor3 = newColor
-        end,
-        Destroy = function()
-            if connection then connection:Disconnect() end
-            cursor:Destroy()
-        end
-    }
-end
-
 local themes = {
     Dark = {
         SchemeColor = Color3.fromRGB(74, 99, 135),
@@ -276,10 +160,7 @@ local themes = {
         SuccessColor = Color3.fromRGB(76, 175, 80),
         WarningColor = Color3.fromRGB(255, 152, 0),
         ErrorColor = Color3.fromRGB(244, 67, 54),
-        GradientColors = {
-            Color3.fromRGB(30, 30, 40),
-            Color3.fromRGB(20, 20, 30)
-        }
+        GradientColors = {Color3.fromRGB(30, 30, 40), Color3.fromRGB(20, 20, 30)}
     },
     Neon = {
         SchemeColor = Color3.fromRGB(0, 255, 255),
@@ -291,10 +172,7 @@ local themes = {
         SuccessColor = Color3.fromRGB(0, 255, 128),
         WarningColor = Color3.fromRGB(255, 255, 0),
         ErrorColor = Color3.fromRGB(255, 0, 64),
-        GradientColors = {
-            Color3.fromRGB(0, 20, 40),
-            Color3.fromRGB(0, 40, 80)
-        }
+        GradientColors = {Color3.fromRGB(0, 20, 40), Color3.fromRGB(0, 40, 80)}
     },
     Cyberpunk = {
         SchemeColor = Color3.fromRGB(255, 0, 128),
@@ -306,10 +184,7 @@ local themes = {
         SuccessColor = Color3.fromRGB(128, 255, 0),
         WarningColor = Color3.fromRGB(255, 128, 0),
         ErrorColor = Color3.fromRGB(255, 0, 64),
-        GradientColors = {
-            Color3.fromRGB(255, 0, 128),
-            Color3.fromRGB(0, 255, 255)
-        }
+        GradientColors = {Color3.fromRGB(255, 0, 128), Color3.fromRGB(0, 255, 255)}
     },
     Material = {
         SchemeColor = Color3.fromRGB(33, 150, 243),
@@ -321,10 +196,7 @@ local themes = {
         SuccessColor = Color3.fromRGB(76, 175, 80),
         WarningColor = Color3.fromRGB(255, 152, 0),
         ErrorColor = Color3.fromRGB(244, 67, 54),
-        GradientColors = {
-            Color3.fromRGB(255, 255, 255),
-            Color3.fromRGB(245, 245, 245)
-        }
+        GradientColors = {Color3.fromRGB(255, 255, 255), Color3.fromRGB(245, 245, 245)}
     },
     Midnight = {
         SchemeColor = Color3.fromRGB(0, 200, 180),
@@ -336,10 +208,7 @@ local themes = {
         SuccessColor = Color3.fromRGB(0, 230, 118),
         WarningColor = Color3.fromRGB(255, 214, 0),
         ErrorColor = Color3.fromRGB(255, 82, 82),
-        GradientColors = {
-            Color3.fromRGB(25, 40, 65),
-            Color3.fromRGB(15, 30, 55)
-        }
+        GradientColors = {Color3.fromRGB(25, 40, 65), Color3.fromRGB(15, 30, 55)}
     }
 }
 
@@ -450,19 +319,6 @@ function Kavo:CreateTooltip(text, position, parent)
     corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = tooltip
     
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(100, 100, 150)
-    stroke.Thickness = 1
-    stroke.Parent = tooltip
-    
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 60)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 50))
-    })
-    gradient.Rotation = 90
-    gradient.Parent = tooltip
-    
     local label = Instance.new("TextLabel")
     label.Name = "Text"
     label.Parent = tooltip
@@ -511,206 +367,11 @@ function Kavo:CreateTooltip(text, position, parent)
     }
 end
 
-function Kavo:CreatePopup(title, content, buttons, theme)
-    theme = theme or themes.Dark
-    
-    local popup = Instance.new("Frame")
-    popup.Name = "Popup"
-    popup.Parent = game.CoreGui
-    popup.BackgroundColor3 = theme.Background
-    popup.BackgroundTransparency = 1
-    popup.BorderSizePixel = 0
-    popup.Size = UDim2.new(1, 0, 1, 0)
-    popup.ZIndex = 9998
-    
-    local overlay = Instance.new("Frame")
-    overlay.Name = "Overlay"
-    overlay.Parent = popup
-    overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-    overlay.BackgroundTransparency = 0.7
-    overlay.Size = UDim2.new(1, 0, 1, 0)
-    
-    local container = Instance.new("Frame")
-    container.Name = "Container"
-    container.Parent = popup
-    container.BackgroundColor3 = theme.Background
-    container.BorderSizePixel = 0
-    container.Size = UDim2.new(0, 400, 0, 300)
-    container.Position = UDim2.new(0.5, -200, 0.5, -150)
-    container.ZIndex = 9999
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
-    corner.Parent = container
-    
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = theme.SchemeColor
-    stroke.Thickness = 2
-    stroke.Parent = container
-    
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new(theme.GradientColors or {theme.Background, theme.Background})
-    gradient.Rotation = 90
-    gradient.Parent = container
-    
-    local titleFrame = Instance.new("Frame")
-    titleFrame.Name = "TitleFrame"
-    titleFrame.Parent = container
-    titleFrame.BackgroundColor3 = theme.Header
-    titleFrame.Size = UDim2.new(1, 0, 0, 50)
-    
-    local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 12, 0, 0)
-    titleCorner.Parent = titleFrame
-    
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Name = "Title"
-    titleLabel.Parent = titleFrame
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Position = UDim2.new(0, 20, 0, 0)
-    titleLabel.Size = UDim2.new(1, -40, 1, 0)
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.Text = title
-    titleLabel.TextColor3 = theme.TextColor
-    titleLabel.TextSize = 18
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    
-    local closeButton = Instance.new("ImageButton")
-    closeButton.Name = "Close"
-    closeButton.Parent = titleFrame
-    closeButton.BackgroundTransparency = 1
-    closeButton.Position = UDim2.new(1, -40, 0, 10)
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Image = "rbxassetid://3926305904"
-    closeButton.ImageRectOffset = Vector2.new(284, 4)
-    closeButton.ImageRectSize = Vector2.new(24, 24)
-    closeButton.ImageColor3 = theme.TextColor
-    
-    local contentFrame = Instance.new("ScrollingFrame")
-    contentFrame.Name = "Content"
-    contentFrame.Parent = container
-    contentFrame.BackgroundTransparency = 1
-    contentFrame.Position = UDim2.new(0, 20, 0, 70)
-    contentFrame.Size = UDim2.new(1, -40, 0, 180)
-    contentFrame.ScrollBarThickness = 5
-    contentFrame.ScrollBarImageColor3 = theme.SchemeColor
-    contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    
-    local contentLabel = Instance.new("TextLabel")
-    contentLabel.Name = "Text"
-    contentLabel.Parent = contentFrame
-    contentLabel.BackgroundTransparency = 1
-    contentLabel.Size = UDim2.new(1, 0, 0, 0)
-    contentLabel.Font = Enum.Font.Gotham
-    contentLabel.Text = content
-    contentLabel.TextColor3 = theme.TextColor
-    contentLabel.TextSize = 14
-    contentLabel.TextWrapped = true
-    contentLabel.TextYAlignment = Enum.TextYAlignment.Top
-    
-    local buttonContainer = Instance.new("Frame")
-    buttonContainer.Name = "Buttons"
-    buttonContainer.Parent = container
-    buttonContainer.BackgroundTransparency = 1
-    buttonContainer.Position = UDim2.new(0, 20, 0, 260)
-    buttonContainer.Size = UDim2.new(1, -40, 0, 30)
-    
-    local buttonList = Instance.new("UIListLayout")
-    buttonList.Parent = buttonContainer
-    buttonList.FillDirection = Enum.FillDirection.Horizontal
-    buttonList.HorizontalAlignment = Enum.HorizontalAlignment.Right
-    buttonList.SortOrder = Enum.SortOrder.LayoutOrder
-    buttonList.Padding = UDim.new(0, 10)
-    
-    Utility:TweenObject(popup, {BackgroundTransparency = 0}, 0.3)
-    Utility:TweenObject(container, {Size = UDim2.new(0, 400, 0, 300)}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-    
-    local result = nil
-    local closed = false
-    
-    local function closePopup(buttonResult)
-        if closed then return end
-        closed = true
-        
-        Utility:TweenObject(container, {
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0.5, 0, 0.5, 0)
-        }, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-        
-        Utility:TweenObject(popup, {BackgroundTransparency = 1}, 0.3)
-        
-        task.delay(0.4, function()
-            popup:Destroy()
-            popups[popup] = nil
-        end)
-        
-        result = buttonResult
-    end
-    
-    closeButton.MouseButton1Click:Connect(function()
-        closePopup(nil)
-    end)
-    
-    for i, buttonData in pairs(buttons or {}) do
-        local button = Instance.new("TextButton")
-        button.Name = "Button"..i
-        button.Parent = buttonContainer
-        button.BackgroundColor3 = buttonData.Color or theme.SchemeColor
-        button.Size = UDim2.new(0, 80, 0, 30)
-        button.Font = Enum.Font.GothamSemibold
-        button.Text = buttonData.Text or "Button"
-        button.TextColor3 = theme.TextColor
-        button.TextSize = 14
-        button.AutoButtonColor = false
-        
-        local buttonCorner = Instance.new("UICorner")
-        buttonCorner.CornerRadius = UDim.new(0, 6)
-        buttonCorner.Parent = button
-        
-        button.MouseButton1Click:Connect(function()
-            Utility:CreateRipple(button, Vector2.new(40, 15), Color3.new(1, 1, 1), 60, 0.3)
-            Utility:PlaySound(4047132169, 0.3)
-            closePopup(buttonData.Value or buttonData.Text)
-        end)
-        
-        button.MouseEnter:Connect(function()
-            Utility:TweenObject(button, {
-                BackgroundColor3 = Color3.fromRGB(
-                    math.min(buttonData.Color.R * 255 + 20, 255),
-                    math.min(buttonData.Color.G * 255 + 20, 255),
-                    math.min(buttonData.Color.B * 255 + 20, 255)
-                )
-            }, 0.2)
-        end)
-        
-        button.MouseLeave:Connect(function()
-            Utility:TweenObject(button, {
-                BackgroundColor3 = buttonData.Color or theme.SchemeColor
-            }, 0.2)
-        end)
-    end
-    
-    popups[popup] = true
-    
-    return {
-        WaitForResult = function()
-            while popups[popup] do
-                run.RenderStepped:Wait()
-            end
-            return result
-        end,
-        Close = function(value)
-            closePopup(value)
-        end
-    }
-end
-
 function Kavo:Notify(title, content, duration, image, sound)
     title = title or "通知"
     content = content or ""
     duration = duration or 5
     image = image or 3926305904
-    sound = sound or 4047132169
     
     if not notifications[LibName] then
         notifications[LibName] = {}
@@ -723,7 +384,6 @@ function Kavo:Notify(title, content, duration, image, sound)
     
     local notificationFrame = Instance.new("Frame")
     local UICorner = Instance.new("UICorner")
-    local gradient = Instance.new("UIGradient")
     local titleLabel = Instance.new("TextLabel")
     local contentLabel = Instance.new("TextLabel")
     local iconImage = Instance.new("ImageLabel")
@@ -732,8 +392,6 @@ function Kavo:Notify(title, content, duration, image, sound)
     local progressBarCorner = Instance.new("UICorner")
     local progressBarFill = Instance.new("Frame")
     local progressBarFillCorner = Instance.new("UICorner")
-    local stroke = Instance.new("UIStroke")
-    local glow = Instance.new("ImageLabel")
     
     notificationFrame.Name = "Notification"..#notifications[LibName] + 1
     notificationFrame.Parent = screenGui
@@ -745,31 +403,8 @@ function Kavo:Notify(title, content, duration, image, sound)
     notificationFrame.ClipsDescendants = true
     notificationFrame.ZIndex = 10000
     
-    glow.Name = "Glow"
-    glow.Parent = notificationFrame
-    glow.BackgroundTransparency = 1
-    glow.Size = UDim2.new(1, 20, 1, 20)
-    glow.Position = UDim2.new(0, -10, 0, -10)
-    glow.Image = "rbxassetid://5554236805"
-    glow.ImageColor3 = Color3.fromRGB(0, 100, 255)
-    glow.ImageTransparency = 0.8
-    glow.ScaleType = Enum.ScaleType.Slice
-    glow.SliceCenter = Rect.new(23, 23, 277, 277)
-    glow.ZIndex = 9999
-    
     UICorner.CornerRadius = UDim.new(0, 12)
     UICorner.Parent = notificationFrame
-    
-    stroke.Color = Color3.fromRGB(100, 100, 150)
-    stroke.Thickness = 1
-    stroke.Parent = notificationFrame
-    
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
-    }
-    gradient.Rotation = 90
-    gradient.Parent = notificationFrame
     
     iconImage.Name = "Icon"
     iconImage.Parent = notificationFrame
@@ -917,18 +552,12 @@ function Kavo:Notify(title, content, duration, image, sound)
         Utility:TweenObject(notificationFrame, {
             BackgroundColor3 = Color3.fromRGB(35, 35, 45)
         }, 0.2)
-        Utility:TweenObject(glow, {
-            ImageTransparency = 0.5
-        }, 0.2)
     end)
     
     notificationFrame.MouseLeave:Connect(function()
         hovering = false
         Utility:TweenObject(notificationFrame, {
             BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-        }, 0.2)
-        Utility:TweenObject(glow, {
-            ImageTransparency = 0.8
         }, 0.2)
     end)
     
@@ -1008,19 +637,6 @@ function Kavo:CreateLib(name, themeName)
     MainGradient.Rotation = 45
     MainGradient.Parent = Main
     
-    local MainGlow = Instance.new("ImageLabel")
-    MainGlow.Name = "Glow"
-    MainGlow.Parent = Main
-    MainGlow.BackgroundTransparency = 1
-    MainGlow.Size = UDim2.new(1, 40, 1, 40)
-    MainGlow.Position = UDim2.new(0, -20, 0, -20)
-    MainGlow.Image = "rbxassetid://5554236805"
-    MainGlow.ImageColor3 = theme.SchemeColor
-    MainGlow.ImageTransparency = 0.9
-    MainGlow.ScaleType = Enum.ScaleType.Slice
-    MainGlow.SliceCenter = Rect.new(23, 23, 277, 277)
-    MainGlow.ZIndex = 99
-    
     local MainHeader = Instance.new("Frame")
     MainHeader.Name = "MainHeader"
     MainHeader.Parent = Main
@@ -1032,18 +648,6 @@ function Kavo:CreateLib(name, themeName)
     local HeaderCorner = Instance.new("UICorner")
     HeaderCorner.CornerRadius = UDim.new(0, 16, 0, 0)
     HeaderCorner.Parent = MainHeader
-    
-    local HeaderGradient = Instance.new("UIGradient")
-    HeaderGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(
-            math.min(theme.Header.R * 255 + 20, 255),
-            math.min(theme.Header.G * 255 + 20, 255),
-            math.min(theme.Header.B * 255 + 20, 255)
-        )),
-        ColorSequenceKeypoint.new(1, theme.Header)
-    })
-    HeaderGradient.Rotation = 90
-    HeaderGradient.Parent = MainHeader
     
     local title = Instance.new("TextLabel")
     title.Name = "title"
@@ -1183,14 +787,6 @@ function Kavo:CreateLib(name, themeName)
     SideCorner.CornerRadius = UDim.new(0, 0, 0, 16)
     SideCorner.Parent = MainSide
     
-    local SideGradient = Instance.new("UIGradient")
-    SideGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 50)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 40))
-    })
-    SideGradient.Rotation = 90
-    SideGradient.Parent = MainSide
-    
     local userInfo = Instance.new("Frame")
     userInfo.Name = "UserInfo"
     userInfo.Parent = MainSide
@@ -1210,11 +806,6 @@ function Kavo:CreateLib(name, themeName)
     local avatarCorner = Instance.new("UICorner")
     avatarCorner.CornerRadius = UDim.new(1, 0)
     avatarCorner.Parent = avatar
-    
-    local avatarStroke = Instance.new("UIStroke")
-    avatarStroke.Color = Color3.fromRGB(255, 255, 255)
-    avatarStroke.Thickness = 2
-    avatarStroke.Parent = avatar
     
     local username = Instance.new("TextLabel")
     username.Name = "Username"
@@ -1268,19 +859,6 @@ function Kavo:CreateLib(name, themeName)
     Pages.Name = "Pages"
     Pages.Parent = pages
     
-    local shadow = Instance.new("ImageLabel")
-    shadow.Name = "Shadow"
-    shadow.Parent = Main
-    shadow.BackgroundTransparency = 1
-    shadow.Position = UDim2.new(0, -30, 0, -30)
-    shadow.Size = UDim2.new(1, 60, 1, 60)
-    shadow.Image = "rbxassetid://5554236805"
-    shadow.ImageColor3 = Color3.new(0, 0, 0)
-    shadow.ImageTransparency = 0.8
-    shadow.ScaleType = Enum.ScaleType.Slice
-    shadow.SliceCenter = Rect.new(23, 23, 277, 277)
-    shadow.ZIndex = 98
-    
     Kavo:DraggingEnabled(MainHeader, Main)
     
     local function savePosition()
@@ -1293,54 +871,8 @@ function Kavo:CreateLib(name, themeName)
         end
     end)
     
-    local particles = {}
-    for i = 1, 20 do
-        local particle = Instance.new("Frame")
-        particle.Name = "Particle"..i
-        particle.Parent = Main
-        particle.BackgroundColor3 = theme.SchemeColor
-        particle.BackgroundTransparency = 0.8
-        particle.BorderSizePixel = 0
-        particle.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
-        particle.Position = UDim2.new(0, math.random(-50, 750), 0, math.random(-50, 550))
-        particle.ZIndex = 95
-        
-        local particleCorner = Instance.new("UICorner")
-        particleCorner.CornerRadius = UDim.new(1, 0)
-        particleCorner.Parent = particle
-        
-        particles[i] = {
-            frame = particle,
-            speedX = math.random(-50, 50) / 100,
-            speedY = math.random(-50, 50) / 100
-        }
-    end
-    
-    local particleConnection = run.RenderStepped:Connect(function(dt)
-        for _, particle in pairs(particles) do
-            if particle.frame and particle.frame.Parent then
-                local currentPos = particle.frame.Position
-                local newX = currentPos.X.Offset + particle.speedX * dt * 60
-                local newY = currentPos.Y.Offset + particle.speedY * dt * 60
-                
-                if newX < -50 then newX = 750 particle.speedX = math.abs(particle.speedX) end
-                if newX > 750 then newX = -50 particle.speedX = -math.abs(particle.speedX) end
-                if newY < -50 then newY = 550 particle.speedY = math.abs(particle.speedY) end
-                if newY > 550 then newY = -50 particle.speedY = -math.abs(particle.speedY) end
-                
-                particle.frame.Position = UDim2.new(0, newX, 0, newY)
-            end
-        end
-    end)
-    
-    animations[particleConnection] = true
-    
     Utility:TweenObject(Main, {
         BackgroundTransparency = 0
-    }, 0.5)
-    
-    Utility:TweenObject(MainGlow, {
-        ImageTransparency = 0.7
     }, 0.5)
     
     Utility:PlaySound(4047132169, 0.5)
@@ -1613,7 +1145,6 @@ function Kavo:CreateLib(name, themeName)
                 local UICorner = Instance.new("UICorner")
                 local icon = Instance.new("ImageLabel")
                 local btnInfo = Instance.new("TextLabel")
-                local hoverEffect = Instance.new("Frame")
                 local tooltip = nil
                 
                 buttonElement.Name = bname
@@ -1649,17 +1180,6 @@ function Kavo:CreateLib(name, themeName)
                 btnInfo.TextXAlignment = Enum.TextXAlignment.Left
                 btnInfo.ZIndex = 106
                 
-                hoverEffect.Name = "HoverEffect"
-                hoverEffect.Parent = buttonElement
-                hoverEffect.BackgroundColor3 = Color3.new(1, 1, 1)
-                hoverEffect.BackgroundTransparency = 0.9
-                hoverEffect.Size = UDim2.new(0, 0, 1, 0)
-                hoverEffect.ZIndex = 106
-                
-                local hoverCorner = Instance.new("UICorner")
-                hoverCorner.CornerRadius = UDim.new(0, 10)
-                hoverCorner.Parent = hoverEffect
-                
                 buttonElement.MouseButton1Click:Connect(function()
                     Utility:CreateRipple(buttonElement, Vector2.new(25, 25), Color3.new(1, 1, 1), 100, 0.4)
                     Utility:PlaySound(4047132169, 0.2)
@@ -1672,11 +1192,6 @@ function Kavo:CreateLib(name, themeName)
                         BackgroundTransparency = 0.3
                     }, 0.2)
                     
-                    Utility:TweenObject(hoverEffect, {
-                        Size = UDim2.new(1, 0, 1, 0),
-                        BackgroundTransparency = 0.7
-                    }, 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-                    
                     if tipInf and tipInf ~= "" then
                         tooltip = Kavo:CreateTooltip(tipInf, UDim2.new(0, mouse.X + 20, 0, mouse.Y + 20), game.CoreGui)
                     end
@@ -1686,11 +1201,6 @@ function Kavo:CreateLib(name, themeName)
                     Utility:TweenObject(buttonElement, {
                         BackgroundTransparency = 0.5
                     }, 0.2)
-                    
-                    Utility:TweenObject(hoverEffect, {
-                        Size = UDim2.new(0, 0, 1, 0),
-                        BackgroundTransparency = 0.9
-                    }, 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
                     
                     if tooltip then
                         tooltip:Destroy()
@@ -1715,13 +1225,6 @@ function Kavo:CreateLib(name, themeName)
                     if newIcon then
                         icon.Image = "rbxassetid://"..tostring(newIcon)
                     end
-                end
-                
-                function ButtonFunction:SetEnabled(enabled)
-                    buttonElement.Active = enabled
-                    buttonElement.BackgroundTransparency = enabled and 0.5 or 0.8
-                    icon.ImageTransparency = enabled and 0 or 0.5
-                    btnInfo.TextTransparency = enabled and 0 or 0.5
                 end
                 
                 return ButtonFunction
@@ -1796,23 +1299,11 @@ function Kavo:CreateLib(name, themeName)
                             BackgroundColor3 = theme.SuccessColor,
                             Position = UDim2.new(1, -18, 0, 2)
                         }, 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                        
-                        Utility:TweenObject(toggleFrame, {
-                            BackgroundColor3 = Color3.fromRGB(
-                                theme.SuccessColor.R * 255 * 0.3,
-                                theme.SuccessColor.G * 255 * 0.3,
-                                theme.SuccessColor.B * 255 * 0.3
-                            )
-                        }, 0.2)
                     else
                         Utility:TweenObject(toggleCircle, {
                             BackgroundColor3 = Color3.fromRGB(180, 180, 200),
                             Position = UDim2.new(0, 2, 0, 2)
                         }, 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                        
-                        Utility:TweenObject(toggleFrame, {
-                            BackgroundColor3 = Color3.fromRGB(70, 70, 85)
-                        }, 0.2)
                     end
                     
                     callback(toggled)
@@ -1855,22 +1346,12 @@ function Kavo:CreateLib(name, themeName)
                     if toggled then
                         toggleCircle.BackgroundColor3 = theme.SuccessColor
                         toggleCircle.Position = UDim2.new(1, -18, 0, 2)
-                        toggleFrame.BackgroundColor3 = Color3.fromRGB(
-                            theme.SuccessColor.R * 255 * 0.3,
-                            theme.SuccessColor.G * 255 * 0.3,
-                            theme.SuccessColor.B * 255 * 0.3
-                        )
                     else
                         toggleCircle.BackgroundColor3 = Color3.fromRGB(180, 180, 200)
                         toggleCircle.Position = UDim2.new(0, 2, 0, 2)
-                        toggleFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 85)
                     end
                     
                     callback(toggled)
-                end
-                
-                function TogFunction:GetState()
-                    return toggled
                 end
                 
                 return TogFunction
@@ -1959,11 +1440,6 @@ function Kavo:CreateLib(name, themeName)
                 handleCorner.CornerRadius = UDim.new(1, 0)
                 handleCorner.Parent = sliderHandle
                 
-                local handleStroke = Instance.new("UIStroke")
-                handleStroke.Color = theme.SchemeColor
-                handleStroke.Thickness = 2
-                handleStroke.Parent = sliderHandle
-                
                 local dragging = false
                 local currentValue = default
                 
@@ -1982,11 +1458,6 @@ function Kavo:CreateLib(name, themeName)
                     dragging = true
                     Utility:PlaySound(4047132169, 0.1)
                     updateSlider(mouse.X)
-                end)
-                
-                sliderBar.MouseButton1Up:Connect(function()
-                    dragging = false
-                    Utility:PlaySound(4047132467, 0.1)
                 end)
                 
                 game:GetService("UserInputService").InputEnded:Connect(function(input)
@@ -2041,10 +1512,6 @@ function Kavo:CreateLib(name, themeName)
                     sliderHandle.Position = UDim2.new(percentage, -8, 0, -4)
                     sliderValue.Text = tostring(value)
                     callback(value)
-                end
-                
-                function SliderFunction:GetValue()
-                    return currentValue
                 end
                 
                 return SliderFunction
@@ -2194,12 +1661,6 @@ function Kavo:CreateLib(name, themeName)
                                 BackgroundTransparency = 0.3
                             }, 0.2)
                         end)
-                        
-                        optionBtn.MouseLeave:Connect(function()
-                            Utility:TweenObject(optionBtn, {
-                                BackgroundTransparency = 0.5
-                            }, 0.2)
-                        end)
                     end
                 end
                 
@@ -2278,18 +1739,6 @@ function Kavo:CreateLib(name, themeName)
                             Rotation = 0
                         }, 0.2)
                         updateSectionFrame()
-                    end
-                end
-                
-                function DropFunction:GetSelected()
-                    return selected
-                end
-                
-                function DropFunction:SetSelected(value)
-                    if table.find(list, value) then
-                        selected = value
-                        dropValue.Text = value
-                        callback(value)
                     end
                 end
                 
@@ -2410,11 +1859,6 @@ function Kavo:CreateLib(name, themeName)
                 previewCorner.CornerRadius = UDim.new(0, 6)
                 previewCorner.Parent = colorPreview
                 
-                local previewStroke = Instance.new("UIStroke")
-                previewStroke.Color = Color3.new(1, 1, 1)
-                previewStroke.Thickness = 2
-                previewStroke.Parent = colorPreview
-                
                 colorPicker.Name = "colorPicker"
                 colorPicker.Parent = colorElement
                 colorPicker.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
@@ -2508,14 +1952,6 @@ function Kavo:CreateLib(name, themeName)
                     callback(currentColor)
                 end
                 
-                local function hexToColor(hex)
-                    hex = hex:gsub("#", "")
-                    local r = tonumber(hex:sub(1, 2), 16) / 255
-                    local g = tonumber(hex:sub(3, 4), 16) / 255
-                    local b = tonumber(hex:sub(5, 6), 16) / 255
-                    return Color3.new(r, g, b)
-                end
-                
                 colorElement.MouseButton1Click:Connect(function()
                     opened = not opened
                     
@@ -2567,30 +2003,6 @@ function Kavo:CreateLib(name, themeName)
                 colorHue.InputBegan:Connect(onHueInput)
                 colorSatVal.InputBegan:Connect(onSatValInput)
                 
-                input.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
-                        if input.UserInputState == Enum.UserInputState.Change then
-                            local mousePos = input.Position
-                            
-                            if colorHue:IsActive() then
-                                local y = math.clamp((mousePos.Y - colorHue.AbsolutePosition.Y) / colorHue.AbsoluteSize.Y, 0, 1)
-                                hue = 1 - y
-                                hueSelector.Position = UDim2.new(0, -2, y, -2)
-                                updateColor(hue, saturation, value)
-                            end
-                            
-                            if colorSatVal:IsActive() then
-                                local x = math.clamp((mousePos.X - colorSatVal.AbsolutePosition.X) / colorSatVal.AbsoluteSize.X, 0, 1)
-                                local y = math.clamp((mousePos.Y - colorSatVal.AbsolutePosition.Y) / colorSatVal.AbsoluteSize.Y, 0, 1)
-                                saturation = x
-                                value = 1 - y
-                                colorSelector.Position = UDim2.new(x, -4, y, -4)
-                                updateColor(hue, saturation, value)
-                            end
-                        end
-                    end
-                end)
-                
                 updateSectionFrame()
                 
                 local ColorFunction = {}
@@ -2600,10 +2012,6 @@ function Kavo:CreateLib(name, themeName)
                     colorPreview.BackgroundColor3 = color
                     colorValue.Text = string.format("#%02X%02X%02X", math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255))
                     callback(color)
-                end
-                
-                function ColorFunction:GetColor()
-                    return currentColor
                 end
                 
                 return ColorFunction
